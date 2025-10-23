@@ -4,6 +4,12 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
       <div className="max-w-md w-full space-y-8">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-6">
+            ← Back to Home
+          </Link>
+        </div>
+
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-8">

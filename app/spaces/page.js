@@ -50,7 +50,7 @@ export default function SpacesPage() {
               <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
               <Link href="/spaces" className="text-blue-600 font-medium">Spaces</Link>
               <Link href="/become-partner" className="text-gray-700 hover:text-blue-600 font-medium">List Your Space</Link>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium">Login</Link>
+              <Link href="/book-demo" className="text-gray-700 hover:text-blue-600 font-medium">Book Demo</Link>
             </div>
           </div>
         </div>
@@ -58,6 +58,9 @@ export default function SpacesPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
+          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-6">
+            ← Back to Home
+          </Link>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Available Workspaces in Ibadan</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Discover {sampleSpaces.length} premium workspaces with verified amenities and reliable connectivity
@@ -121,8 +124,8 @@ export default function SpacesPage() {
           <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
             We're adding new spaces every week. Tell us what you need and we'll help you find the perfect workspace.
           </p>
-          <Link href="/become-partner" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-semibold text-lg inline-block">
-            List Your Space
+          <Link href="/book-demo" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-semibold text-lg inline-block">
+            Book a Demo
           </Link>
         </div>
       </div>
