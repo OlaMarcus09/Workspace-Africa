@@ -5,27 +5,29 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
   
   body {
-    @apply text-slate-900 antialiased;
+    @apply text-primary-900 antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg;
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200;
   }
   
   .btn-secondary {
-    @apply bg-white hover:bg-slate-50 text-primary-600 border border-slate-200 font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-md;
+    @apply border border-primary-600 text-primary-600 hover:bg-primary-50 font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-sleek border border-gray-100;
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-xl hover:scale-105 cursor-pointer;
-  }
-  
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent;
+    @apply card transition-all duration-300 hover:shadow-sleek-lg;
   }
 }

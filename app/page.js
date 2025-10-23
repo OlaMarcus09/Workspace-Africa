@@ -1,81 +1,133 @@
 import Link from 'next/link'
 import { 
+  Search, 
   MapPin, 
   Wifi, 
-  Coffee, 
-  Zap, 
-  CheckCircle, 
-  Users,
-  Building,
-  ArrowRight
+  Users, 
+  Clock, 
+  Shield,
+  ArrowRight,
+  Star
 } from 'lucide-react'
 
 export default function Home() {
   const features = [
     {
-      icon: <Zap className="h-6 w-6" />,
+      icon: <Clock className="h-6 w-6" />,
       title: "Book in 60 Seconds",
-      description: "Find, book, and get to work. No waiting, no complications."
+      description: "Instant booking with guaranteed availability"
     },
     {
-      icon: <CheckCircle className="h-6 w-6" />,
-      title: "Guaranteed Workspaces",
-      description: "Every space is verified for quality, amenities, and reliability."
+      icon: <Shield className="h-6 w-6" />,
+      title: "Verified Spaces",
+      description: "Every space meets our quality standards"
     },
     {
-      icon: <Building className="h-6 w-6" />,
-      title: "Fill Empty Desks",
-      description: "Space owners get pre-paid customers they wouldn't reach otherwise."
+      icon: <Wifi className="h-6 w-6" />,
+      title: "Premium Amenities",
+      description: "High-speed WiFi, meeting rooms, and more"
     }
   ]
 
   const spaces = [
     {
-      name: "Innovation Hub Ibadan",
+      name: "Innovation Hub",
       location: "Bodija, Ibadan",
-      amenities: ["High-speed WiFi", "Meeting Rooms", "Coffee Bar", "Printing"],
-      price: "₦5,000/day",
-      image: "/api/placeholder/400/250"
+      price: "₦5,000",
+      rating: 4.8,
+      image: "/api/placeholder/400/300",
+      amenities: ["WiFi", "Meeting Rooms", "Coffee"]
     },
     {
-      name: "TechPoint Lounge",
+      name: "TechPoint Lounge", 
       location: "Ring Road, Ibadan",
-      amenities: ["24/7 Access", "Event Space", "Private Booths", "Snacks"],
-      price: "₦4,500/day",
-      image: "/api/placeholder/400/250"
+      price: "₦4,500",
+      rating: 4.6,
+      image: "/api/placeholder/400/300",
+      amenities: ["24/7 Access", "Event Space", "Printing"]
+    },
+    {
+      name: "Creative Corner",
+      location: "UI Axis, Ibadan", 
+      price: "₦4,000",
+      rating: 4.9,
+      image: "/api/placeholder/400/300",
+      amenities: ["Natural Light", "Quiet Zones", "Snacks"]
     }
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="border-b border-gray-100">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
+              <span className="text-xl font-semibold text-primary-900">WorkSpace</span>
+            </div>
+            
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/spaces" className="text-primary-600 hover:text-primary-700 font-medium">Spaces</Link>
+              <Link href="/become-partner" className="text-primary-600 hover:text-primary-700 font-medium">List Your Space</Link>
+              <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">Login</Link>
+              <Link href="/signup" className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-blue-800 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Your <span className="gradient-text">Office</span> is Waiting
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-            Discover and book <span className="font-semibold">guaranteed workspaces</span> across Africa in 60 seconds. 
-            From cozy coffee shops to professional coworking spaces.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link href="/spaces" className="btn-primary bg-white text-primary-600 hover:bg-blue-50 text-lg px-8 py-4">
-              Find a Workspace <ArrowRight className="ml-2 h-5 w-5 inline" />
-            </Link>
-            <Link href="/partner" className="btn-secondary text-white border-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
-              List Your Space
-            </Link>
+      <section className="relative bg-gradient-to-br from-primary-50 to-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-900 mb-6 leading-tight">
+              Find Your Perfect <span className="text-primary-600">Workspace</span>
+            </h1>
+            <p className="text-xl text-primary-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Book professional workspaces across Africa. From cozy corners to premium offices—find your perfect spot in seconds.
+            </p>
+            
+            {/* Search Bar */}
+            <div className="bg-white rounded-2xl shadow-sleek-lg p-2 max-w-2xl mx-auto mb-16">
+              <div className="flex flex-col md:flex-row gap-2">
+                <div className="flex-1 flex items-center px-4 py-3">
+                  <MapPin className="h-5 w-5 text-primary-400 mr-3" />
+                  <input 
+                    type="text" 
+                    placeholder="Where do you need space?"
+                    className="flex-1 outline-none text-primary-900 placeholder-primary-400"
+                  />
+                </div>
+                <div className="flex-1 flex items-center px-4 py-3 border-l border-gray-100">
+                  <Clock className="h-5 w-5 text-primary-400 mr-3" />
+                  <input 
+                    type="text" 
+                    placeholder="When?"
+                    className="flex-1 outline-none text-primary-900 placeholder-primary-400"
+                  />
+                </div>
+                <button className="bg-primary-600 text-white px-8 py-3 rounded-xl hover:bg-primary-700 transition-colors font-semibold flex items-center">
+                  <Search className="h-5 w-5 mr-2" />
+                  Find Spaces
+                </button>
+              </div>
+            </div>
           </div>
 
+          {/* Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="text-white mb-4 inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl">
-                  {feature.icon}
+              <div key={index} className="text-center p-6">
+                <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <div className="text-primary-600">
+                    {feature.icon}
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-blue-100">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-primary-900 mb-2">{feature.title}</h3>
+                <p className="text-primary-600 text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -83,116 +135,129 @@ export default function Home() {
       </section>
 
       {/* Featured Spaces */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-primary-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 gradient-text">Featured Workspaces in Ibadan</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Hand-picked spaces with verified amenities and reliable connectivity
+            <h2 className="text-3xl font-bold text-primary-900 mb-4">Featured Workspaces</h2>
+            <p className="text-primary-600 max-w-2xl mx-auto">
+              Hand-picked spaces in Ibadan with premium amenities and reliable connectivity
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {spaces.map((space, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg border border-slate-200 card-hover overflow-hidden">
-                <div className="h-48 bg-gradient-to-br from-primary-500 to-accent-400"></div>
+              <div key={index} className="bg-white rounded-2xl shadow-sleek overflow-hidden hover:shadow-sleek-lg transition-shadow">
+                <div className="h-48 bg-gradient-to-br from-primary-200 to-primary-300 relative">
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-primary-900">
+                    {space.price}/day
+                  </div>
+                </div>
+                
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-bold text-slate-900">{space.name}</h3>
-                    <span className="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
-                      {space.price}
-                    </span>
+                    <h3 className="text-xl font-semibold text-primary-900">{space.name}</h3>
+                    <div className="flex items-center text-sm text-primary-600">
+                      <Star className="h-4 w-4 fill-current text-yellow-400 mr-1" />
+                      {space.rating}
+                    </div>
                   </div>
                   
-                  <div className="flex items-center text-slate-600 mb-4">
+                  <div className="flex items-center text-primary-600 mb-4 text-sm">
                     <MapPin className="h-4 w-4 mr-2" />
                     {space.location}
                   </div>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {space.amenities.slice(0, 3).map((amenity, idx) => (
-                      <span key={idx} className="bg-slate-100 text-slate-700 text-sm px-3 py-1 rounded-full">
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {space.amenities.map((amenity, idx) => (
+                      <span key={idx} className="bg-primary-100 text-primary-700 text-xs px-2 py-1 rounded">
                         {amenity}
                       </span>
                     ))}
                   </div>
 
-                  <button className="btn-primary w-full">
+                  <button className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                     Book Now
                   </button>
                 </div>
               </div>
             ))}
-            
-            {/* Add Your Space Card */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-700 rounded-2xl shadow-lg card-hover overflow-hidden text-white p-8 flex flex-col justify-center items-center text-center">
-              <Building className="h-12 w-12 mb-4 text-primary-400" />
-              <h3 className="text-2xl font-bold mb-3">List Your Space</h3>
-              <p className="text-slate-300 mb-6">
-                Join WorkSpace Africa and fill your empty desks with pre-paid professionals
-              </p>
-              <Link href="/partner" className="btn-primary bg-primary-500 hover:bg-primary-400">
-                Get Started
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/spaces" className="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold">
+              View all spaces <ArrowRight className="h-5 w-5 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-primary-900 mb-6">Ready to Transform Your Workday?</h2>
+            <p className="text-primary-600 mb-8 text-lg max-w-2xl mx-auto">
+              Join thousands of professionals who've found their perfect workspace through WorkSpace Africa.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/spaces" className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                Find a Workspace
+              </Link>
+              <Link href="/become-partner" className="border border-primary-600 text-primary-600 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold">
+                List Your Space
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Value Proposition */}
-      <section className="py-20 bg-slate-50">
+      {/* Footer */}
+      <footer className="bg-primary-900 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h2 className="text-4xl font-bold mb-6 gradient-text">
-                For Space Owners: Turn Empty Desks into Revenue
-              </h2>
-              <p className="text-lg text-slate-700 mb-8 leading-relaxed">
-                Connect with professionals actively looking for workspaces. Get pre-paid bookings 
-                and manage your space efficiently with our tools.
-              </p>
-              
-              <div className="space-y-4">
-                {[
-                  "Pre-paid customers you wouldn't reach otherwise",
-                  "Simple dashboard to manage bookings and availability",
-                  "Zero upfront costs - pay only when you get bookings",
-                  "Join Africa's fastest-growing work community"
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center">
-                    <CheckCircle className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-slate-700">{item}</span>
-                  </div>
-                ))}
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-white rounded-lg"></div>
+                <span className="text-xl font-semibold">WorkSpace</span>
               </div>
+              <p className="text-primary-300 text-sm">
+                Africa's essential technology infrastructure for the flexible work economy.
+              </p>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200">
-              <div className="text-center mb-6">
-                <Users className="h-12 w-12 text-primary-600 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-slate-900">Ready to Get Started?</h3>
-                <p className="text-slate-600 mt-2">Join our 6 partner spaces in Ibadan</p>
-              </div>
-              
-              <div className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder="Your Space Name"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                <input 
-                  type="email" 
-                  placeholder="Email Address"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                <button className="btn-primary w-full">
-                  Apply to List Your Space
-                </button>
-              </div>
+            <div>
+              <h4 className="font-semibold mb-4">For Professionals</h4>
+              <ul className="space-y-2 text-sm text-primary-300">
+                <li><Link href="/spaces" className="hover:text-white">Find Spaces</Link></li>
+                <li><Link href="/cities" className="hover:text-white">Cities</Link></li>
+                <li><Link href="/pricing" className="hover:text-white">Pricing</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">For Partners</h4>
+              <ul className="space-y-2 text-sm text-primary-300">
+                <li><Link href="/become-partner" className="hover:text-white">List Your Space</Link></li>
+                <li><Link href="/resources" className="hover:text-white">Resources</Link></li>
+                <li><Link href="/support" className="hover:text-white">Support</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-sm text-primary-300">
+                <li><Link href="/about" className="hover:text-white">About</Link></li>
+                <li><Link href="/careers" className="hover:text-white">Careers</Link></li>
+                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
+              </ul>
             </div>
           </div>
+          
+          <div className="border-t border-primary-800 mt-8 pt-8 text-center text-sm text-primary-400">
+            <p>&copy; 2024 WorkSpace Africa. All rights reserved.</p>
+          </div>
         </div>
-      </section>
+      </footer>
     </div>
   )
 }
