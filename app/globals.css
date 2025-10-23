@@ -18,7 +18,7 @@
   }
   
   .btn-secondary {
-    @apply bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-md;
+    @apply bg-white hover:bg-slate-50 text-primary-600 border border-slate-200 font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-md;
   }
   
   .card-hover {
