@@ -1,4 +1,6 @@
+'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const sampleSpaces = [
   {
@@ -36,6 +38,18 @@ const sampleSpaces = [
 ]
 
 export default function SpacesPage() {
+  const router = useRouter()
+
+  const handleBookNow = (spaceId) => {
+    // In a real app, this would start the booking process
+    // For now, redirect to the space detail page
+    router.push(`/spaces/${spaceId}`)
+  }
+
+  const handleViewDetails = (spaceId) => {
+    router.push(`/spaces/${spaceId}`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -51,6 +65,7 @@ export default function SpacesPage() {
               <Link href="/spaces" className="text-blue-600 font-medium">Spaces</Link>
               <Link href="/become-partner" className="text-gray-700 hover:text-blue-600 font-medium">List Your Space</Link>
               <Link href="/book-demo" className="text-gray-700 hover:text-blue-600 font-medium">Book Demo</Link>
+              <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium">Login</Link>
             </div>
           </div>
         </div>
@@ -80,10 +95,7 @@ export default function SpacesPage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{space.name}</h3>
                 
                 <div className="flex items-center text-gray-600 mb-3 text-sm">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <span className="mr-2">📍</span>
                   {space.location}
                 </div>
 
@@ -106,10 +118,16 @@ export default function SpacesPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex-1">
+                  <button 
+                    onClick={() => handleBookNow(space.id)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex-1"
+                  >
                     Book Now
                   </button>
-                  <button className="border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-3 px-6 rounded-lg transition-colors flex-1">
+                  <button 
+                    onClick={() => handleViewDetails(space.id)}
+                    className="border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-3 px-6 rounded-lg transition-colors flex-1"
+                  >
                     View Details
                   </button>
                 </div>
