@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev", 
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SUPABASE_URL": "https://vfglkdsjtbdtagbkwwwr.supabase.co",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmZ2xrZHNqdGJkdGFnYmt3d3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyMDY0MzksImV4cCI6MjA3Njc4MjQzOX0.2XVhQaz5yVqepkLzR8TIIkp-MHcDAMfhDw8Bc6h_ZYI",
+      "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY": "pk_live_0381797f256652c8ca06d8e15bdd35afe461086c"
+    }
+  },
+  "env": {
+    "PAYSTACK_SECRET_KEY": "your_paystack_secret_key_here"
+  }
+}
