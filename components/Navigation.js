@@ -3,10 +3,26 @@ import Link from 'next/link'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navigation() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, loading } = useAuth()
 
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  if (loading) {
+    return (
+      <nav className="border-b border-gray-100">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
+              <span className="text-xl font-semibold text-primary-900">WorkSpace</span>
+            </Link>
+            <div className="text-primary-600 text-sm">Loading...</div>
+          </div>
+        </div>
+      </nav>
+    )
   }
 
   return (
@@ -19,12 +35,13 @@ export default function Navigation() {
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
+            <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium">Home</Link>
             <Link href="/spaces" className="text-primary-600 hover:text-primary-700 font-medium">Spaces</Link>
             <Link href="/become-partner" className="text-primary-600 hover:text-primary-700 font-medium">List Your Space</Link>
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link href="/dashboard" className="text-primary-600 hover:text-primary-700 font-medium">Dashboard</Link>
+                <span className="text-primary-600">Welcome, {user.email}</span>
                 <button 
                   onClick={handleSignOut}
                   className="text-primary-600 hover:text-primary-700 font-medium"
