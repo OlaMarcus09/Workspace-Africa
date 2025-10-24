@@ -1,38 +1,121 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('bookings')
+  const [userBookings, setUserBookings] = useState([])
+  const [userFavorites, setUserFavorites] = useState([])
+  const [profileData, setProfileData] = useState({})
+  const [loading, setLoading] = useState(true)
   
-  // Mock data - in real app, this would come from your database
-  const userBookings = [
-    {
-      id: 1,
-      spaceName: "Seb's Hub Co-Working Space",
-      date: "2024-03-20",
-      status: "Confirmed",
-      amount: 3000,
-      duration: "1 day"
-    },
-    {
-      id: 2,
-      spaceName: "Worknub Co-working Space",
-      date: "2024-03-25", 
-      status: "Confirmed",
-      amount: 3500,
-      duration: "1 day"
-    }
-  ]
+  const { user, signOut, isConfigured, loading: authLoading } = useAuth()
+  const router = useRouter()
 
-  const userFavorites = [
-    {
-      id: 1,
-      name: "Stargate Workstation",
-      location: "Cocoa House, Dugbe, Ibadan",
-      price: 4500
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
     }
-  ]
+  }, [user, authLoading, router])
+
+  // Fetch user data
+  useEffect(() => {
+    if (user && isConfigured) {
+      fetchUserData()
+    }
+  }, [user, isConfigured])
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true)
+      
+      // Mock data for demonstration
+      const mockBookings = [
+        {
+          id: 1,
+          spaceName: "Seb's Hub Co-Working Space",
+          date: "2024-03-20",
+          status: "Confirmed",
+          amount: 3000,
+          duration: "1 day"
+        },
+        {
+          id: 2,
+          spaceName: "Worknub Co-working Space",
+          date: "2024-03-25", 
+          status: "Confirmed",
+          amount: 3500,
+          duration: "1 day"
+        }
+      ]
+
+      const mockFavorites = [
+        {
+          id: 1,
+          name: "Stargate Workstation",
+          location: "Cocoa House, Dugbe, Ibadan",
+          price: 4500
+        }
+      ]
+
+      setUserBookings(mockBookings)
+      setUserFavorites(mockFavorites)
+      
+      setProfileData({
+        name: user.user_metadata?.full_name || 'User',
+        email: user.email,
+        phone: '+234 800 000 0000'
+      })
+      
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isConfigured) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center max-w-md">
+          <div className="text-4xl mb-4">🔧</div>
+          <h2 className="text-2xl font-bold text-yellow-800 mb-4">Authentication Not Configured</h2>
+          <p className="text-yellow-700 mb-6">
+            Please check your environment variables and ensure Supabase is properly configured.
+          </p>
+          <Link href="/" className="bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 transition-colors font-medium">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -48,7 +131,15 @@ export default function Dashboard() {
               <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
               <Link href="/spaces" className="text-gray-700 hover:text-blue-600 font-medium">Spaces</Link>
               <Link href="/dashboard" className="text-blue-600 font-medium">Dashboard</Link>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium">Logout</Link>
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700">Welcome, {profileData.name}</span>
+                <button 
+                  onClick={handleSignOut}
+                  className="text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -60,7 +151,7 @@ export default function Dashboard() {
             ← Back to Home
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-          <p className="text-gray-600">Manage your bookings and account</p>
+          <p className="text-gray-600">Welcome back, {profileData.name}!</p>
         </div>
 
         {/* Dashboard Tabs */}
@@ -155,9 +246,12 @@ export default function Dashboard() {
                         <p className="text-gray-600 text-sm">{space.location}</p>
                         <p className="text-lg font-semibold text-gray-900 mt-2">₦{space.price}/day</p>
                         <div className="mt-4 flex gap-2">
-                          <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                          <Link 
+                            href={`/spaces/${space.id}`}
+                            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
+                          >
                             Book Now
-                          </button>
+                          </Link>
                           <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-50">
                             Remove
                           </button>
@@ -184,22 +278,27 @@ export default function Dashboard() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input
                       type="text"
+                      value={profileData.name}
+                      onChange={(e) => setProfileData({...profileData, name: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="John Doe"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="john@example.com"
+                      value={profileData.email}
+                      disabled
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                     <input
                       type="tel"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="+234 800 000 0000"
                     />

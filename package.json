@@ -8,6 +8,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
     "lucide-react": "^0.294.0",
     "next": "^14.2.33",
     "react": "18.2.0",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
+    "dotenv": "^17.2.3",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.0",
     "postcss": "^8.4.31",
