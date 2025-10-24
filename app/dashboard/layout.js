@@ -50,10 +50,10 @@ export default function DashboardLayout({ children }) {
                 <span className="text-xl font-bold text-gray-900">WorkSpace Africa</span>
               </Link>
               <div className="hidden md:flex items-center space-x-6">
-                <Link href="/dashboard" className="text-blue-600 font-medium">Dashboard</Link>
+                <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">Dashboard</Link>
                 <Link href="/authenticated/spaces" className="text-gray-700 hover:text-blue-600 font-medium">Spaces</Link>
-                <Link href="/bookings" className="text-gray-700 hover:text-blue-600 font-medium">Bookings</Link>
-                <Link href="/profile" className="text-gray-700 hover:text-blue-600 font-medium">Profile</Link>
+                <Link href="/dashboard/bookings" className="text-gray-700 hover:text-blue-600 font-medium">Bookings</Link>
+                <Link href="/dashboard/settings" className="text-gray-700 hover:text-blue-600 font-medium">Settings</Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

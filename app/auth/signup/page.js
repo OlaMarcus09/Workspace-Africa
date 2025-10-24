@@ -8,7 +8,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
-  const [userType, setUserType] = useState('professional') // professional, corporate, partner
+  const [userType, setUserType] = useState('professional')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
@@ -27,12 +27,21 @@ export default function SignUp() {
     setError('')
 
     try {
-      const { user } = await signUp(email, password, { 
+      const userData = {
         full_name: fullName,
-        user_type: userType
-      }, userType)
+        role: userType
+      }
+
+      // Add additional fields based on user type
+      if (userType === 'corporate') {
+        userData.company_name = 'Your Company'
+      } else if (userType === 'partner') {
+        userData.space_name = 'Your Space'
+      }
+
+      const result = await signUp(email, password, userData)
       
-      if (user) {
+      if (result.user) {
         // Redirect based on user type
         if (userType === 'partner') {
           router.push('/partner/dashboard')
@@ -41,9 +50,11 @@ export default function SignUp() {
         } else {
           router.push('/dashboard')
         }
+      } else if (result.error) {
+        setError(result.error.message)
       }
     } catch (error) {
-      setError(error.message)
+      setError(error.message || 'An error occurred during signup')
     } finally {
       setLoading(false)
     }
@@ -167,6 +178,38 @@ export default function SignUp() {
               />
             </div>
 
+            {userType === 'corporate' && (
+              <div>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Name
+                </label>
+                <input
+                  id="companyName"
+                  name="companyName"
+                  type="text"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your company name"
+                />
+              </div>
+            )}
+
+            {userType === 'partner' && (
+              <div>
+                <label htmlFor="spaceName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Space Name
+                </label>
+                <input
+                  id="spaceName"
+                  name="spaceName"
+                  type="text"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your space name"
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -200,22 +243,6 @@ export default function SignUp() {
               />
             </div>
 
-            {userType === 'corporate' && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-700">
-                  <strong>Corporate account:</strong> You'll be able to manage team members, set budgets, and track workspace usage for your organization.
-                </p>
-              </div>
-            )}
-
-            {userType === 'partner' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-700">
-                  <strong>Partner account:</strong> You'll be able to list your space, manage bookings, and track revenue through our partner dashboard.
-                </p>
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={loading}
@@ -226,7 +253,7 @@ export default function SignUp() {
 
             <div className="text-center">
               <span className="text-gray-600">Already have an account? </span>
-              <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold">
                 Sign in
               </Link>
             </div>

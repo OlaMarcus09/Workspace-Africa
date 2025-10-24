@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
   }, [isConfigured]);
 
   // Sign up function with role
-  const signUp = async (email, password, metadata = {}, role = 'professional') => {
+  const signUp = async (email, password, userData = {}) => {
     if (!isConfigured) {
       throw new Error('Authentication is not configured');
     }
@@ -69,10 +69,7 @@ export function AuthProvider({ children }) {
         email,
         password,
         options: {
-          data: {
-            ...metadata,
-            role: role
-          }
+          data: userData
         }
       });
 
