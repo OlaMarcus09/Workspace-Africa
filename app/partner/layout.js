@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
 
-export default function DashboardLayout({ children }) {
+export default function PartnerLayout({ children }) {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
 
@@ -40,24 +40,25 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Dashboard Header */}
+      {/* Partner Header */}
       <nav className="border-b border-gray-200 bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
-              <Link href="/dashboard" className="flex items-center space-x-3">
+              <Link href="/partner/dashboard" className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg"></div>
                 <span className="text-xl font-bold text-gray-900">WorkSpace Africa</span>
               </Link>
               <div className="hidden md:flex items-center space-x-6">
-                <Link href="/dashboard" className="text-blue-600 font-medium">Dashboard</Link>
-                <Link href="/authenticated/spaces" className="text-gray-700 hover:text-blue-600 font-medium">Spaces</Link>
-                <Link href="/bookings" className="text-gray-700 hover:text-blue-600 font-medium">Bookings</Link>
-                <Link href="/profile" className="text-gray-700 hover:text-blue-600 font-medium">Profile</Link>
+                <Link href="/partner/dashboard" className="text-blue-600 font-medium">Dashboard</Link>
+                <Link href="/partner/calendar" className="text-gray-700 hover:text-blue-600 font-medium">Calendar</Link>
+                <Link href="/partner/bookings" className="text-gray-700 hover:text-blue-600 font-medium">Bookings</Link>
+                <Link href="/partner/analytics" className="text-gray-700 hover:text-blue-600 font-medium">Analytics</Link>
+                <Link href="/partner/settings" className="text-gray-700 hover:text-blue-600 font-medium">Settings</Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.email}</span>
+              <span className="text-gray-700">Partner Portal</span>
               <button 
                 onClick={handleLogout}
                 className="text-gray-700 hover:text-blue-600 font-medium"
