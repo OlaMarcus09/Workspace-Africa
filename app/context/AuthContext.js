@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { databaseService } from '../../lib/supabase/client';
 
 // Create Supabase client
 const supabase = createClient(
@@ -13,6 +14,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isConfigured, setIsConfigured] = useState(false);
 
@@ -30,6 +32,42 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Create or update user profile
+  const createUserProfile = async (userData) => {
+    try {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userData.id)
+        .single();
+
+      if (!existingProfile) {
+        const { data: newProfile, error } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: userData.id,
+              email: userData.email,
+              full_name: userData.user_metadata?.full_name,
+              role: userData.user_metadata?.role || 'professional',
+              company_name: userData.user_metadata?.company_name,
+              space_name: userData.user_metadata?.space_name
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return newProfile;
+      }
+
+      return existingProfile;
+    } catch (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
+  };
+
   // Check for active session on mount
   useEffect(() => {
     if (!isConfigured) return;
@@ -37,7 +75,16 @@ export function AuthProvider({ children }) {
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setUser(session.user);
+          // Create or get user profile
+          const userProfile = await createUserProfile(session.user);
+          setProfile(userProfile);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -50,7 +97,14 @@ export function AuthProvider({ children }) {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null);
+        if (session?.user) {
+          setUser(session.user);
+          const userProfile = await createUserProfile(session.user);
+          setProfile(userProfile);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
         setLoading(false);
       }
     );
@@ -58,7 +112,7 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [isConfigured]);
 
-  // Sign up function with role
+  // Sign up function
   const signUp = async (email, password, userData = {}) => {
     if (!isConfigured) {
       throw new Error('Authentication is not configured');
@@ -113,19 +167,28 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Get user role
-  const getUserRole = () => {
-    return user?.user_metadata?.role || 'professional';
+  // Update profile
+  const updateProfile = async (updates) => {
+    if (!user) throw new Error('No user logged in');
+    
+    try {
+      const updatedProfile = await databaseService.updateProfile(user.id, updates);
+      setProfile(updatedProfile);
+      return updatedProfile;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to update profile');
+    }
   };
 
   const value = {
     user,
+    profile,
     signUp,
     signIn,
     signOut,
+    updateProfile,
     loading,
-    isConfigured,
-    getUserRole
+    isConfigured
   };
 
   return (
