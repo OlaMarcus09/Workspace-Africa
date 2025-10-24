@@ -58,8 +58,8 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [isConfigured]);
 
-  // Sign up function
-  const signUp = async (email, password, metadata = {}) => {
+  // Sign up function with role
+  const signUp = async (email, password, metadata = {}, role = 'professional') => {
     if (!isConfigured) {
       throw new Error('Authentication is not configured');
     }
@@ -69,7 +69,10 @@ export function AuthProvider({ children }) {
         email,
         password,
         options: {
-          data: metadata
+          data: {
+            ...metadata,
+            role: role
+          }
         }
       });
 
@@ -113,13 +116,19 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Get user role
+  const getUserRole = () => {
+    return user?.user_metadata?.role || 'professional';
+  };
+
   const value = {
     user,
     signUp,
     signIn,
     signOut,
     loading,
-    isConfigured
+    isConfigured,
+    getUserRole
   };
 
   return (

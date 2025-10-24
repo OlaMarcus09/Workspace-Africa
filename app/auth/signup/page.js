@@ -8,6 +8,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [userType, setUserType] = useState('professional') // professional, corporate, partner
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
@@ -26,9 +27,20 @@ export default function SignUp() {
     setError('')
 
     try {
-      const { user } = await signUp(email, password, { full_name: fullName })
+      const { user } = await signUp(email, password, { 
+        full_name: fullName,
+        user_type: userType
+      }, userType)
+      
       if (user) {
-        router.push('/dashboard')
+        // Redirect based on user type
+        if (userType === 'partner') {
+          router.push('/partner/dashboard')
+        } else if (userType === 'corporate') {
+          router.push('/corporate/dashboard')
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (error) {
       setError(error.message)
@@ -92,6 +104,53 @@ export default function SignUp() {
               </div>
             )}
 
+            {/* User Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                I am a...
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setUserType('professional')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    userType === 'professional'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="text-lg mb-1">👨‍💼</div>
+                  <div className="text-sm font-medium">Professional</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setUserType('corporate')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    userType === 'corporate'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🏢</div>
+                  <div className="text-sm font-medium">Corporate</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setUserType('partner')}
+                  className={`p-3 border rounded-lg text-center transition-colors ${
+                    userType === 'partner'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🤝</div>
+                  <div className="text-sm font-medium">Partner</div>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
@@ -141,12 +200,28 @@ export default function SignUp() {
               />
             </div>
 
+            {userType === 'corporate' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-700">
+                  <strong>Corporate account:</strong> You'll be able to manage team members, set budgets, and track workspace usage for your organization.
+                </p>
+              </div>
+            )}
+
+            {userType === 'partner' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-700">
+                  <strong>Partner account:</strong> You'll be able to list your space, manage bookings, and track revenue through our partner dashboard.
+                </p>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Creating Account...' : `Create ${userType.charAt(0).toUpperCase() + userType.slice(1)} Account`}
             </button>
 
             <div className="text-center">
