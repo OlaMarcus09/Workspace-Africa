@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { databaseService } from '../../lib/supabase/client';
+import { databaseService } from "../../lib/utils/supabase-client";
 
 // Create Supabase client
 const supabase = createClient(

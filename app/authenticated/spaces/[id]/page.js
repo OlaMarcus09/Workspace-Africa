@@ -2,7 +2,33 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { supabase, getCurrentUserProfile } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Inline Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Inline getCurrentUserProfile function
+const getCurrentUserProfile = async () => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError) throw userError
+    if (!user) return null
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) throw profileError
+    return profile
+  } catch (error) {
+    console.error('Error getting user profile:', error)
+    return null
+  }
+}
 
 export default function SpaceDetail() {
   const params = useParams()
@@ -171,27 +197,6 @@ export default function SpaceDetail() {
         </div>
       </div>
     )
-  }
-
-  const amenitiesIcons = {
-    "Wi-Fi": "📶",
-    "High-speed WiFi": "📶",
-    "Meeting Rooms": "👥",
-    "Private Offices": "🏢",
-    "AC": "❄️",
-    "Kitchen": "🍳",
-    "Power Backup": "🔋",
-    "Event Space": "🎪",
-    "24/7 Access": "🕒",
-    "Lounge": "🛋️",
-    "Parking": "🅿️",
-    "Snacks": "☕",
-    "Coffee Bar": "☕",
-    "Printing": "🖨️",
-    "Security": "🔒",
-    "Cleaning Services": "🧹",
-    "Reception Services": "💁",
-    "Prestigious Location": "⭐"
   }
 
   // Generate next 7 days for availability calendar
