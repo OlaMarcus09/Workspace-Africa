@@ -2,97 +2,101 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-
-// Mock data - in real app, this would come from your database
-const spaceData = {
-  1: {
-    id: 1,
-    name: "Seb's Hub Co-Working Space",
-    location: "Bodija, Ibadan",
-    price: 3000,
-    description: "A premium coworking space in Bodija with flexible plans and premium amenities including AC, kitchen, meeting rooms, and high-speed Wi-Fi.",
-    amenities: ["Wi-Fi", "Meeting Rooms", "Coffee", "AC", "Kitchen", "Power Backup", "Printing", "Parking"],
-    rating: 4.8,
-    reviews: 24,
-    images: [],
-    availability: {
-      "2024-03-25": 5,
-      "2024-03-26": 3,
-      "2024-03-27": 5,
-      "2024-03-28": 4,
-      "2024-03-29": 2
-    }
-  },
-  2: {
-    id: 2,
-    name: "Worknub Co-working Space", 
-    location: "Agodi GRA, Ibadan",
-    price: 3500,
-    description: "Professional workspace with super fast Wi-Fi, private offices, meeting rooms, event hall, and 24/7 electricity.",
-    amenities: ["24/7 Access", "Event Space", "Printing", "Parking", "Private Offices", "Wi-Fi", "AC", "Power Backup"],
-    rating: 4.9,
-    reviews: 18,
-    images: [],
-    availability: {
-      "2024-03-25": 8,
-      "2024-03-26": 6,
-      "2024-03-27": 7,
-      "2024-03-28": 8,
-      "2024-03-29": 5
-    }
-  }
-}
+import { supabase, getCurrentUserProfile } from '@/lib/supabase'
 
 export default function SpaceDetail() {
   const params = useParams()
   const router = useRouter()
   const spaceId = params.id
   const [space, setSpace] = useState(null)
+  const [availability, setAvailability] = useState({})
   const [selectedDate, setSelectedDate] = useState('')
   const [availableDesks, setAvailableDesks] = useState(0)
   const [loading, setLoading] = useState(true)
   const [bookingLoading, setBookingLoading] = useState(false)
+  const [userProfile, setUserProfile] = useState(null)
 
   useEffect(() => {
-    // In a real app, this would be an API call to fetch space details
-    const fetchSpaceDetails = async () => {
-      setLoading(true)
-      try {
-        await new Promise(resolve => setTimeout(resolve, 800))
-        const spaceDetail = spaceData[spaceId]
-        if (spaceDetail) {
-          setSpace(spaceDetail)
-          // Set default selected date to tomorrow
-          const tomorrow = new Date()
-          tomorrow.setDate(tomorrow.getDate() + 1)
-          const dateString = tomorrow.toISOString().split('T')[0]
-          setSelectedDate(dateString)
-          setAvailableDesks(spaceDetail.availability[dateString] || 0)
-        } else {
-          // Space not found
-          router.push('/authenticated/spaces')
-        }
-      } catch (error) {
-        console.error('Error fetching space details:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchSpaceDetails()
-  }, [spaceId, router])
+    fetchUserProfile()
+  }, [spaceId])
+
+  const fetchUserProfile = async () => {
+    const profile = await getCurrentUserProfile()
+    setUserProfile(profile)
+  }
+
+  const fetchSpaceDetails = async () => {
+    setLoading(true)
+    try {
+      // Fetch space details
+      const { data: spaceData, error: spaceError } = await supabase
+        .from('spaces')
+        .select('*')
+        .eq('id', spaceId)
+        .single()
+
+      if (spaceError) throw spaceError
+
+      if (!spaceData) {
+        router.push('/authenticated/spaces')
+        return
+      }
+
+      setSpace(spaceData)
+
+      // Fetch availability for next 7 days
+      const startDate = new Date()
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() + 6)
+
+      const { data: availabilityData, error: availabilityError } = await supabase
+        .from('space_availability')
+        .select('*')
+        .eq('space_id', spaceId)
+        .gte('date', startDate.toISOString().split('T')[0])
+        .lte('date', endDate.toISOString().split('T')[0])
+
+      if (availabilityError) throw availabilityError
+
+      const availabilityObj = {}
+      availabilityData?.forEach(avail => {
+        availabilityObj[avail.date] = avail.available_desks
+      })
+      setAvailability(availabilityObj)
+
+      // Set default selected date to tomorrow
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const dateString = tomorrow.toISOString().split('T')[0]
+      setSelectedDate(dateString)
+      setAvailableDesks(availabilityObj[dateString] || 0)
+
+    } catch (error) {
+      console.error('Error fetching space details:', error)
+      alert('Error loading space details. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (space && selectedDate) {
-      setAvailableDesks(space.availability[selectedDate] || 0)
+    if (selectedDate) {
+      setAvailableDesks(availability[selectedDate] || 0)
     }
-  }, [selectedDate, space])
+  }, [selectedDate, availability])
 
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value)
   }
 
   const handleBookNow = async () => {
+    if (!userProfile) {
+      alert('Please log in to book a space')
+      router.push('/login')
+      return
+    }
+
     if (!selectedDate) {
       alert('Please select a date')
       return
@@ -105,12 +109,41 @@ export default function SpaceDetail() {
 
     setBookingLoading(true)
     try {
-      // In a real app, this would create a booking in the database
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
+      // Create booking in database
+      const { data: booking, error } = await supabase
+        .from('bookings')
+        .insert([
+          {
+            user_id: userProfile.id,
+            space_id: parseInt(spaceId),
+            booking_date: selectedDate,
+            start_time: '09:00',
+            end_time: '18:00',
+            status: 'confirmed',
+            total_amount: space.pricing_daily || space.price,
+            payment_status: 'paid'
+          }
+        ])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Update availability
+      const newAvailableDesks = availableDesks - 1
+      const { error: availabilityError } = await supabase
+        .from('space_availability')
+        .update({ available_desks: newAvailableDesks })
+        .eq('space_id', spaceId)
+        .eq('date', selectedDate)
+
+      if (availabilityError) throw availabilityError
+
       // Redirect to booking confirmation
-      router.push(`/booking/confirmation?space=${space.id}&date=${selectedDate}`)
+      router.push(`/booking/confirmation?booking=${booking.id}`)
+
     } catch (error) {
+      console.error('Error creating booking:', error)
       alert('Error creating booking. Please try again.')
     } finally {
       setBookingLoading(false)
@@ -140,6 +173,34 @@ export default function SpaceDetail() {
     )
   }
 
+  const amenitiesIcons = {
+    "Wi-Fi": "📶",
+    "High-speed WiFi": "📶",
+    "Meeting Rooms": "👥",
+    "Private Offices": "🏢",
+    "AC": "❄️",
+    "Kitchen": "🍳",
+    "Power Backup": "🔋",
+    "Event Space": "🎪",
+    "24/7 Access": "🕒",
+    "Lounge": "🛋️",
+    "Parking": "🅿️",
+    "Snacks": "☕",
+    "Coffee Bar": "☕",
+    "Printing": "🖨️",
+    "Security": "🔒",
+    "Cleaning Services": "🧹",
+    "Reception Services": "💁",
+    "Prestigious Location": "⭐"
+  }
+
+  // Generate next 7 days for availability calendar
+  const next7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date()
+    date.setDate(date.getDate() + i)
+    return date.toISOString().split('T')[0]
+  })
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -165,8 +226,9 @@ export default function SpaceDetail() {
             
             <div className="flex items-center mb-4">
               <div className="flex items-center">
-                <span className="text-yellow-400 text-lg">⭐⭐⭐⭐⭐</span>
-                <span className="ml-2 text-gray-600">({space.reviews} reviews)</span>
+                <span className="text-yellow-400 text-lg">⭐</span>
+                <span className="ml-1 text-lg font-semibold">{space.rating || 4.5}</span>
+                <span className="ml-2 text-gray-600">({space.review_count || 0} reviews)</span>
               </div>
               <span className="mx-4 text-gray-300">•</span>
               <div className="flex items-center text-gray-600">
@@ -178,21 +240,33 @@ export default function SpaceDetail() {
             <div className="flex items-center mb-6">
               <div className="flex items-center text-gray-600 mr-6">
                 <span className="mr-2">🕒</span>
-                24/7 Access
+                {space.amenities?.includes('24/7 Access') ? '24/7 Access' : 'Business Hours'}
               </div>
               <div className="flex items-center text-gray-600">
                 <span className="mr-2">💰</span>
-                ₦{space.price}/day
+                ₦{(space.pricing_daily || space.price)?.toLocaleString()}/day
               </div>
             </div>
 
             <p className="text-gray-700 mb-6 leading-relaxed">{space.description}</p>
 
+            {/* Contact Information */}
+            {(space.contact_person || space.contact_email || space.contact_phone) && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-semibold text-blue-900 mb-2">Contact Information</h3>
+                <div className="space-y-1 text-sm text-blue-800">
+                  {space.contact_person && <div>👤 {space.contact_person}</div>}
+                  {space.contact_email && <div>📧 {space.contact_email}</div>}
+                  {space.contact_phone && <div>📞 {space.contact_phone}</div>}
+                </div>
+              </div>
+            )}
+
             {/* Amenities */}
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h3>
               <div className="grid grid-cols-2 gap-3">
-                {space.amenities.map((amenity, index) => (
+                {(space.amenities || []).map((amenity, index) => (
                   <div key={index} className="flex items-center">
                     <span className="text-green-500 mr-2">✓</span>
                     <span className="text-gray-700">{amenity}</span>
@@ -213,28 +287,32 @@ export default function SpaceDetail() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Live Availability</h3>
               
               {/* Simple availability calendar */}
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                {Object.entries(space.availability).slice(0, 5).map(([date, desks]) => {
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {next7Days.map((date) => {
                   const dateObj = new Date(date)
                   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
                   const isSelected = date === selectedDate
+                  const desks = availability[date] || 0
                   
                   return (
                     <button
                       key={date}
                       onClick={() => setSelectedDate(date)}
-                      className={`p-3 border rounded-lg text-center transition-colors ${
+                      disabled={desks === 0}
+                      className={`p-2 border rounded-lg text-center transition-colors text-xs ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : desks === 0
+                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
                           : 'border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      <div className="text-sm font-medium">{dayNames[dateObj.getDay()]}</div>
-                      <div className="text-xs text-gray-500 mb-1">{dateObj.getDate()}</div>
+                      <div className="font-medium">{dayNames[dateObj.getDay()]}</div>
+                      <div className="text-gray-500 mb-1">{dateObj.getDate()}</div>
                       <div className={`text-xs font-semibold ${
                         desks > 3 ? 'text-green-600' : desks > 0 ? 'text-yellow-600' : 'text-red-600'
                       }`}>
-                        {desks} desks
+                        {desks}
                       </div>
                     </button>
                   )
@@ -277,28 +355,32 @@ export default function SpaceDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="border border-blue-500 bg-blue-50 rounded-lg p-4 text-center">
                   <div className="font-semibold text-blue-700">1-Day Pass</div>
-                  <div className="text-2xl font-bold text-gray-900">₦{space.price}</div>
+                  <div className="text-2xl font-bold text-gray-900">₦{(space.pricing_daily || space.price)?.toLocaleString()}</div>
                   <div className="text-sm text-gray-600">Perfect for a day</div>
                 </div>
-                <div className="border border-gray-300 rounded-lg p-4 text-center">
-                  <div className="font-semibold text-gray-700">5-Day Pass</div>
-                  <div className="text-2xl font-bold text-gray-900">₦{(space.price * 5 * 0.9).toLocaleString()}</div>
-                  <div className="text-sm text-gray-600">Save 10%</div>
-                </div>
+                {space.pricing_weekly && (
+                  <div className="border border-gray-300 rounded-lg p-4 text-center">
+                    <div className="font-semibold text-gray-700">Weekly Pass</div>
+                    <div className="text-2xl font-bold text-gray-900">₦{space.pricing_weekly.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">Save with weekly</div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Book Now Button */}
             <button
               onClick={handleBookNow}
-              disabled={bookingLoading || availableDesks === 0}
+              disabled={bookingLoading || availableDesks === 0 || !userProfile}
               className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {bookingLoading ? 'Processing...' : `Book Now - ₦${space.price}`}
+              {!userProfile ? 'Login to Book' : 
+               bookingLoading ? 'Processing...' : 
+               `Book Now - ₦${(space.pricing_daily || space.price)?.toLocaleString()}`}
             </button>
 
             <p className="text-center text-gray-600 text-sm mt-4">
-              ✅ Instant confirmation • 🔒 Secure payment • 📱 Mobile pass
+              ✅ Instant confirmation • 🔒 Secure booking • 📱 Mobile pass
             </p>
           </div>
 
@@ -316,11 +398,11 @@ export default function SpaceDetail() {
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Free coffee and tea
+                {space.amenities?.includes('Kitchen') ? 'Kitchen access' : 'Refreshment area'}
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Printing facilities (limited)
+                {space.amenities?.includes('Meeting Rooms') ? 'Meeting room access' : 'Work areas'}
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
